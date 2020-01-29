@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './TodoTracker.module.css';
 import Task from './Task/Task';
+import db from '../db';
 
 class TodoTracker extends React.Component {
     constructor(props) {
@@ -11,6 +12,14 @@ class TodoTracker extends React.Component {
         }
     }
 
+    componentDidMount(){
+        db.table('tasks')
+          .toArray()
+          .then((todos)=>{
+              this.setState({todos});
+          });
+    }
+
     handleChange = (e) => {
         this.setState({ currentText: e.target.value });
     }
@@ -19,23 +28,48 @@ class TodoTracker extends React.Component {
         e.preventDefault();
         let { currentText } = this.state;
         let { todos } = this.state;
-        if (this.state.currentText !== '') {
-            todos.push(currentText);
-            currentText = '';
-            this.setState({ todos, currentText });
+        if(this.state.currentText !== ''){
+            const task = {
+                text: currentText
+            }
+            db.table('tasks')
+              .add(task)
+              .then((id)=>{
+                task[id]=id;
+                todos.push(task);
+                currentText = '';
+                this.setState({todos,currentText});
+              })
+              .catch((err)=>{
+                  console.log(`Cannot add task cause ${err}`);
+              })
         }
     }
 
     deleteTask = (index) => {
         const { todos } = this.state;
-        todos.splice(index, 1);
-        this.setState({ todos });
+        db.table('tasks')
+          .delete(index)
+          .then(()=>{
+              this.setState({ todos: todos.filter((todo)=> todo.id !== index) });
+          })
+          .catch((err)=>{
+              console.log(`Delete failed cause : ${err}`);
+          })
     }
 
     editTask = (index, text) => {
         const { todos } = this.state;
-        todos[index] = text;
-        this.setState({ todos });
+        db.table('tasks')
+          .update(index,{text})
+          .then(()=>{
+            todos.forEach((todo)=>{
+                if(todo.id === index){
+                    todo.text = text;
+                }
+            });
+            this.setState({todos});
+          });
     }
 
     render() {
@@ -46,9 +80,9 @@ class TodoTracker extends React.Component {
                     <input type="submit" value="Submit" />
                 </form>
                 <div>
-                    {this.state.todos.map((task, index) => <Task text={task}
+                    {this.state.todos.map((task, index) => <Task text={task.text}
                         key={index}
-                        index={index}
+                        index={task.id}
                         delete={this.deleteTask}
                         edit={this.editTask} />)}
                 </div>
