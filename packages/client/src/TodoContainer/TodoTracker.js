@@ -69,7 +69,10 @@ class TodoTracker extends React.Component {
                 }
             });
             this.setState({todos});
-          });
+          })
+          .catch((err)=>{
+              console.log(`Cannot edit task cause :${err}`);
+          })
     }
 
     render() {
