@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './Task.module.css';
+import PropTypes from 'prop-types';
 
 class Task extends React.Component {
     constructor(props) {
@@ -33,5 +34,12 @@ class Task extends React.Component {
         )
     }
 }
+
+Task.propTypes = {
+  text: PropTypes.string,
+  index: PropTypes.number,
+  delete: PropTypes.func.isRequired,
+  edit: PropTypes.func.isRequired
+};
 
 export default Task;
