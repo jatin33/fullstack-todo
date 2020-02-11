@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './Task.module.css';
 import PropTypes from 'prop-types';
 
-class Task extends React.Component {
+class Task extends React.PureComponent {
     constructor(props) {
         super(props);
         this.state = {

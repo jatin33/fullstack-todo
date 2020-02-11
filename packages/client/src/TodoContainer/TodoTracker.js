@@ -7,9 +7,9 @@ class TodoTracker extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            todos: [],
-            currentText: ''
+            todos: []
         }
+        this.currentText = React.createRef();
     }
 
     componentDidMount(){
@@ -20,25 +20,21 @@ class TodoTracker extends React.Component {
           });
     }
 
-    handleChange = (e) => {
-        this.setState({ currentText: e.target.value });
-    }
-
     handleSubmit = (e) => {
         e.preventDefault();
-        let { currentText } = this.state;
+        let { value } = this.currentText.current;
         let { todos } = this.state;
-        if(this.state.currentText !== ''){
+        if(value !== ''){
             const task = {
-                text: currentText
+                text: value
             }
             db.table('tasks')
               .add(task)
               .then((id)=>{
                 task[id]=id;
                 todos.push(task);
-                currentText = '';
-                this.setState({todos,currentText});
+                this.currentText.current.value = '';
+                this.setState({todos});
               })
               .catch((err)=>{
                   console.log(`Cannot add task cause ${err}`);
@@ -79,10 +75,16 @@ class TodoTracker extends React.Component {
         return (
             <div className={styles.container}>
                 <form onSubmit={this.handleSubmit} className={styles.form}>
-                    <input value={this.state.currentText} onChange={this.handleChange} />
-                    <input type="submit" value="Submit" />
+                    <label htmlFor="taskname">
+                    Task Name:
+                    <input value={this.state.currentText}
+                           ref={this.currentText}
+                           placeholder={'Enter Task'} 
+                           id="taskname"/>
+                    </label>
+                    <button type="submit">Submit</button>
                 </form>
-                <div>
+                <div data-testid="tasklist">
                     {this.state.todos.map((task, index) => <Task text={task.text}
                         key={index}
                         index={task.id}
