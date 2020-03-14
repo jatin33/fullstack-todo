@@ -86,7 +86,7 @@ class TodoTracker extends React.Component {
                 </form>
                 <div data-testid="tasklist">
                     {this.state.todos.map((task, index) => <Task text={task.text}
-                        key={index}
+                        key={task.text}
                         index={task.id}
                         delete={this.deleteTask}
                         edit={this.editTask} />)}
